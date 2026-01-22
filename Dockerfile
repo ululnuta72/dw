@@ -1,54 +1,17 @@
-FROM alpine:3.19
+FROM --platform=linux/amd64 ubuntu:22.04
 
-# 1. Setup Repositories
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.19/main" > /etc/apk/repositories && \
-    echo "http://dl-cdn.alpinelinux.org/alpine/v3.19/community" >> /etc/apk/repositories
-
-# 2. Install Dependencies
-RUN apk update && apk add --no-cache \
-    bash \
-    fluxbox \
-    xterm \
-    tigervnc \
-    novnc \
-    websockify \
-    firefox \
-    sudo \
-    curl \
-    wget \
-    openssl \
-    adwaita-icon-theme \
-    ttf-dejavu \
-    xrandr \
-    xdpyinfo
-
-# 3. Setup Environment
-ENV USER=root
-ENV DISPLAY=:1
-
-# 4. Setup VNC & Fluxbox Menu
-RUN mkdir -p /root/.vnc && \
-    mkdir -p /root/.fluxbox && \
-    echo '[begin] (Fluxbox)' > /root/.fluxbox/menu && \
-    echo '  [exec] (Firefox) {firefox}' >> /root/.fluxbox/menu && \
-    echo '  [exec] (Terminal) {xterm}' >> /root/.fluxbox/menu && \
-    echo '  [separator]' >> /root/.fluxbox/menu && \
-    echo '  [exec] (Exit) {exit}' >> /root/.fluxbox/menu && \
-    echo '[end]' >> /root/.fluxbox/menu
-
-# 5. Fix NoVNC Index (PENTING AGAR BISA DIAKSES LANGSUNG)
-# Kita pastikan vnc.html menjadi halaman utama (index.html)
-RUN ln -s /usr/share/novnc/vnc.html /usr/share/novnc/index.html
-
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt update -y && apt install --no-install-recommends -y xfce4 xfce4-goodies tigervnc-standalone-server novnc websockify sudo xterm init systemd snapd vim net-tools curl wget git tzdata
+RUN apt update -y && apt install -y dbus-x11 x11-utils x11-xserver-utils x11-apps
+RUN apt install software-properties-common -y
+RUN add-apt-repository ppa:mozillateam/ppa -y
+RUN echo 'Package: *' >> /etc/apt/preferences.d/mozilla-firefox
+RUN echo 'Pin: release o=LP-PPA-mozillateam' >> /etc/apt/preferences.d/mozilla-firefox
+RUN echo 'Pin-Priority: 1001' >> /etc/apt/preferences.d/mozilla-firefox
+RUN echo 'Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:jammy";' | tee /etc/apt/apt.conf.d/51unattended-upgrades-firefox
+RUN apt update -y && apt install -y firefox
+RUN apt update -y && apt install -y xubuntu-icon-theme
+RUN touch /root/.Xauthority
 EXPOSE 5901
 EXPOSE 6080
-
-# 6. Command
-# PERBAIKAN: 
-# 1. Menghapus lock file X11 (penting saat container restart)
-# 2. Menggunakan tanda kutip tunggal (') di dalam -subj agar tidak crash
-CMD bash -c "rm -rf /tmp/.X1-lock /tmp/.X11-unix && \
-    vncserver :1 -localhost no -SecurityTypes None -geometry 1024x768 --I-KNOW-THIS-IS-INSECURE && \
-    openssl req -new -subj '/C=JP' -x509 -days 365 -nodes -out self.pem -keyout self.pem && \
-    websockify -D --web=/usr/share/novnc/ --cert=self.pem 6080 localhost:5901 && \
-    fluxbox"
+CMD bash -c "vncserver -localhost no -SecurityTypes None -geometry 1024x768 --I-KNOW-THIS-IS-INSECURE && openssl req -new -subj "/C=JP" -x509 -days 365 -nodes -out self.pem -keyout self.pem && websockify -D --web=/usr/share/novnc/ --cert=self.pem 6080 localhost:5901 && tail -f /dev/null"

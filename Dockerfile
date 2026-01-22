@@ -1,39 +1,31 @@
-FROM alpine:3.19
+FROM --platform=linux/amd64 alpine:3.19
 
-# Install dependencies
-# Kita tidak butuh systemd, snapd, atau PPA (Firefox di Alpine sudah native package, bukan snap)
 RUN apk add --no-cache \
-    bash \
     xfce4 \
     xfce4-terminal \
     tigervnc \
     novnc \
     websockify \
-    firefox \
     sudo \
+    bash \
+    vim \
+    net-tools \
     curl \
     wget \
     git \
     tzdata \
-    openssl \
-    adwaita-icon-theme \
-    ttf-dejavu \
-    xorg-server-utils
+    dbus-x11 \
+    firefox-esr \
+    xf86-video-dummy \
+    mesa-dri-gallium \
+    font-noto \
+    openssl
 
-# Setup environment
-ENV USER=root
-ENV DISPLAY=:1
+RUN touch /root/.Xauthority
 
-# Konfigurasi VNC Password file (opsional, karena di CMD anda pakai SecurityTypes None, tapi good practice)
-RUN mkdir -p /root/.vnc
+EXPOSE 5901 6080
 
-# Expose ports
-EXPOSE 5901
-EXPOSE 6080
-
-# Command
-# Catatan: Path novnc di Alpine biasanya ada di /usr/share/novnc
-CMD bash -c "vncserver :1 -localhost no -SecurityTypes None -geometry 1024x768 --I-KNOW-THIS-IS-INSECURE && \
-    openssl req -new -subj "/C=JP" -x509 -days 365 -nodes -out self.pem -keyout self.pem && \
+CMD bash -c "vncserver -localhost no -SecurityTypes None -geometry 1024x768 --I-KNOW-THIS-IS-INSECURE && \
+    openssl req -new -subj '/C=JP' -x509 -days 365 -nodes -out self.pem -keyout self.pem && \
     websockify -D --web=/usr/share/novnc/ --cert=self.pem 6080 localhost:5901 && \
     tail -f /dev/null"

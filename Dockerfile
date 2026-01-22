@@ -19,13 +19,22 @@ RUN apk add --no-cache \
     xf86-video-dummy \
     mesa-dri-gallium \
     font-noto \
-    openssl
+    openssl \
+    xvfb
 
 RUN touch /root/.Xauthority
 
+# Setup VNC password (optional, bisa dihapus jika ingin no password)
+RUN mkdir -p /root/.vnc && \
+    echo "password" | vncpasswd -f > /root/.vnc/passwd && \
+    chmod 600 /root/.vnc/passwd
+
 EXPOSE 5901 6080
 
-CMD bash -c "vncserver -localhost no -SecurityTypes None -geometry 1024x768 --I-KNOW-THIS-IS-INSECURE && \
+CMD bash -c "Xvfb :1 -screen 0 1024x768x24 & \
+    export DISPLAY=:1 && \
+    startxfce4 & \
+    x0vncserver -display :1 -rfbport 5901 -SecurityTypes None --I-KNOW-THIS-IS-INSECURE & \
     openssl req -new -subj '/C=JP' -x509 -days 365 -nodes -out self.pem -keyout self.pem && \
     websockify -D --web=/usr/share/novnc/ --cert=self.pem 6080 localhost:5901 && \
     tail -f /dev/null"

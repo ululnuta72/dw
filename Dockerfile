@@ -1,40 +1,38 @@
-FROM --platform=linux/amd64 alpine:3.19
+FROM --platform=linux/amd64 debian:12-slim
 
-RUN apk add --no-cache \
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install --no-install-recommends -y \
     xfce4 \
     xfce4-terminal \
-    tigervnc \
+    tigervnc-standalone-server \
+    tigervnc-common \
     novnc \
     websockify \
     sudo \
-    bash \
     vim \
-    net-tools \
     curl \
     wget \
-    git \
-    tzdata \
     dbus-x11 \
     firefox-esr \
-    xf86-video-dummy \
-    mesa-dri-gallium \
-    font-noto \
     openssl \
-    xvfb
+    procps \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN touch /root/.Xauthority
-
-# Setup VNC password (optional, bisa dihapus jika ingin no password)
-RUN mkdir -p /root/.vnc && \
-    echo "password" | vncpasswd -f > /root/.vnc/passwd && \
-    chmod 600 /root/.vnc/passwd
+RUN mkdir -p /root/.vnc && touch /root/.Xauthority
 
 EXPOSE 5901 6080
 
-CMD bash -c "Xvfb :1 -screen 0 1024x768x24 & \
-    export DISPLAY=:1 && \
-    startxfce4 & \
-    x0vncserver -display :1 -rfbport 5901 -SecurityTypes None --I-KNOW-THIS-IS-INSECURE & \
-    openssl req -new -subj '/C=JP' -x509 -days 365 -nodes -out self.pem -keyout self.pem && \
-    websockify -D --web=/usr/share/novnc/ --cert=self.pem 6080 localhost:5901 && \
-    tail -f /dev/null"
+CMD bash -c "\
+    echo '=== Starting VNC Server ===' && \
+    vncserver :1 -geometry 1024x768 -depth 24 -localhost no -SecurityTypes None && \
+    sleep 2 && \
+    echo '=== Generating SSL certificate ===' && \
+    openssl req -new -subj '/C=JP' -x509 -days 365 -nodes -out /root/self.pem -keyout /root/self.pem && \
+    echo '=== Starting websockify ===' && \
+    websockify --web=/usr/share/novnc/ --cert=/root/self.pem 6080 localhost:5901 & \
+    sleep 2 && \
+    echo '=== VNC Server Status ===' && \
+    ps aux | grep vnc && \
+    echo '=== noVNC available at http://localhost:6080/vnc.html ===' && \
+    tail -f /root/.vnc/*.log"

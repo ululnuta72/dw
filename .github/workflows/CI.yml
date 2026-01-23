@@ -10,9 +10,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source
+      # 1) Checkout repo Dockerfile
+      - name: Checkout docker repo
         uses: actions/checkout@v4
+        with:
+          path: docker
+
+      # 2) Checkout source code repo
+      - name: Checkout app source
+        uses: actions/checkout@v4
+        with:
+          repository: ululnuta72/sflow
+          ref: main
+          path: app
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -23,13 +35,12 @@ jobs:
           username: ${{ secrets.DOCKERUSER }}
           password: ${{ secrets.DOCKERTOKEN }}
 
-      - name: Build and push (amd64)
+      - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: Dockerfile
+          file: docker/Dockerfile
           platforms: linux/amd64
           push: true
           tags: |
             ${{ secrets.DOCKERUSER }}/xfce-novnc:latest
-            ${{ secrets.DOCKERUSER }}/xfce-novnc:${{ github.sha }}

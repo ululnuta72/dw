@@ -1,3 +1,27 @@
+# =========================
+# 1) BUILDER
+# =========================
+FROM node:20-bookworm-slim AS builder
+
+WORKDIR /app
+
+# install git
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+
+# clone repo (PIN commit biar reproducible)
+RUN git clone https://github.com/ululnuta72/sflow.git . \
+    && git checkout main
+
+# install deps
+RUN npm ci
+
+# kalau ada build step
+# RUN npm run build
+
+# =========================
+# 2) RUNTIME (XFCE + VNC)
+# =========================
 FROM --platform=linux/amd64 debian:12-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6,27 +30,24 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     xfce4 \
     xfce4-terminal \
     tigervnc-standalone-server \
+    tigervnc-common \
     novnc \
     websockify \
-    sudo \
-    vim \
-    net-tools \
-    curl \
-    wget \
+    dbus-x11 \
+    ca-certificates \
+    openssl \
     git \
     git-lfs \
     nodejs \
     npm \
-    tzdata \
-    dbus-x11 \
-    firefox-esr \
-    openssl \
-    ca-certificates \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/ululnuta72/sflow.git
-
 RUN touch /root/.Xauthority
+
+# copy app dari builder
+COPY --from=builder /app /opt/app
+WORKDIR /opt/app
 
 EXPOSE 5901 6080
 

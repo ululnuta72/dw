@@ -23,6 +23,7 @@ FROM --platform=linux/amd64 debian:12-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
+    firefox-esr \
     xfce4 \
     xfce4-terminal \
     tigervnc-standalone-server \

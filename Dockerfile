@@ -35,16 +35,18 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     openssl \
     git \
     git-lfs \
-    nodejs \
-    npm \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
+    
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN touch /root/.Xauthority
 
 # copy app dari builder
-COPY --from=builder /app /opt/app
-WORKDIR /opt/app
+COPY --from=builder /app /root/app
+WORKDIR /root/app
 
 EXPOSE 5901 6080
 

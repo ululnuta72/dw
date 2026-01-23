@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     git-lfs \
     ffmpeg \
     nodejs \
-    npm
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # XFCE session

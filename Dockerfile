@@ -14,12 +14,17 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     curl \
     wget \
     git \
+    git-lfs \
+    nodejs \
+    npm \
     tzdata \
     dbus-x11 \
     firefox-esr \
     openssl \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+RUN git clone https://github.com/ululnuta72/sflow.git
 
 RUN touch /root/.Xauthority
 

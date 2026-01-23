@@ -10,8 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 
 # clone repo (PIN commit biar reproducible)
-RUN git clone https://github.com/ululnuta72/sflow.git . \
-    && git checkout main
+RUN git clone https://github.com/ululnuta72/sflow.git .
 
 # install deps
 RUN npm ci

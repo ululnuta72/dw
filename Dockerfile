@@ -1,7 +1,7 @@
 # =========================
 # 1) BUILDER
 # =========================
-FROM node:20-bookworm-slim AS builder
+FROM node:current-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN npm install
 # =========================
 # 2) RUNTIME (XFCE + VNC)
 # =========================
-FROM --platform=linux/amd64 debian:12-slim
+FROM --platform=linux/amd64 node:24-bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -40,7 +40,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     npm
     && rm -rf /var/lib/apt/lists/*
 
-RUN touch /root/.Xauthority
+# XFCE session
+RUN echo "exec startxfce4 &" > /root/.xsession \
+    && touch /root/.Xauthority
 
 # copy app dari builder
 COPY --from=builder /app /root/app

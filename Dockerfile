@@ -6,10 +6,11 @@ FROM node:current-bookworm-slim AS builder
 WORKDIR /app
 
 # install git
-RUN apt-get update && apt-get install -y --no-install-recommends git \
+RUN apt-get update && apt-get install -y --no-install-recommends git git-lfs \
     && rm -rf /var/lib/apt/lists/*
 
 COPY app/ .
+RUN git-lfs pull
 RUN npm install
 
 # kalau ada build step
@@ -18,7 +19,7 @@ RUN npm install
 # =========================
 # 2) RUNTIME (XFCE + VNC)
 # =========================
-FROM --platform=linux/amd64 node:24-bookworm-slim
+FROM node:current-bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 

@@ -9,11 +9,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 
-# clone repo (PIN commit biar reproducible)
-RUN git clone https://github.com/ululnuta72/sflow.git .
-
-# install deps
-RUN npm ci
+COPY app/ .
+RUN npm install
 
 # kalau ada build step
 # RUN npm run build

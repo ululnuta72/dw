@@ -1,29 +1,11 @@
-# =========================
-# 1) BUILDER
-# =========================
-FROM node:current-bookworm-slim AS builder
-
-WORKDIR /app
-
-# install git
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git git-lfs \
-    && git lfs install \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY app/ .
-RUN npm install
-
-# kalau ada build step
-# RUN npm run build
-
-# =========================
-# 2) RUNTIME (XFCE + VNC)
-# =========================
 FROM node:current-bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /root/app
 
+# =========================
+# SYSTEM DEPENDENCIES
+# =========================
 RUN apt-get update && apt-get install --no-install-recommends -y \
     firefox-esr \
     xfce4 \
@@ -41,18 +23,29 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     && git lfs install \
     && rm -rf /var/lib/apt/lists/*
 
-# XFCE session
+# =========================
+# XFCE SESSION
+# =========================
 RUN echo "exec startxfce4 &" > /root/.xsession \
     && touch /root/.Xauthority
 
-# copy app dari builder
-COPY --from=builder /app /root/app
-WORKDIR /root/app
-RUN git lfs pull
+RUN git clone https://github.com/ululnuta72/sflow.git . \
+    && git lfs pull \
+    && npm install
 
+# kalau ada build step
+# RUN npm run build
+
+# =========================
+# PORTS
+# =========================
 EXPOSE 5901 6080
 
-CMD bash -c "vncserver -localhost no -SecurityTypes None -geometry 1024x768 --I-KNOW-THIS-IS-INSECURE && \
+# =========================
+# START SERVICES
+# =========================
+CMD bash -c "\
+    vncserver -localhost no -SecurityTypes None -geometry 1024x768 --I-KNOW-THIS-IS-INSECURE && \
     openssl req -new -subj '/C=JP' -x509 -days 365 -nodes -out self.pem -keyout self.pem && \
     websockify -D --web=/usr/share/novnc/ --cert=self.pem 6080 localhost:5901 && \
     tail -f /dev/null"

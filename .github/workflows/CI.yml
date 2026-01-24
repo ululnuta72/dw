@@ -19,12 +19,12 @@ jobs:
           path: docker
 
       # 2) Checkout source code repo
-      - name: Checkout app source
-        uses: actions/checkout@v4
-        with:
-          repository: ululnuta72/sflow
-          ref: main
-          path: app
+      # - name: Checkout app source
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: ululnuta72/sflow
+      #     ref: main
+      #     path: app
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

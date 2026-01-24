@@ -44,8 +44,12 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 # =========================
 # XFCE SESSION
 # =========================
-RUN echo "exec startxfce4 &" > /root/.xsession \
-    && touch /root/.Xauthority
+RUN mkdir -p /root/.vnc && \
+    echo '#!/bin/sh' > /root/.vnc/xstartup && \
+    echo 'unset SESSION_MANAGER' >> /root/.vnc/xstartup && \
+    echo 'unset DBUS_SESSION_BUS_ADDRESS' >> /root/.vnc/xstartup && \
+    echo 'exec startxfce4 &' >> /root/.vnc/xstartup && \
+    chmod +x /root/.vnc/xstartup
 
 EXPOSE 5901 6080
 

@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM debian:stable-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /root
@@ -12,6 +12,10 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     curl \
     wget \
     git \
+    git-lfs \
+    ffmpeg \
+    nodejs \
+    npm \
     tzdata \
     dbus-x11 \
     x11-xserver-utils \

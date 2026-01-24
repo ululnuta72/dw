@@ -36,11 +36,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     dbus-x11 \
     ca-certificates \
     openssl \
-    git \
-    git-lfs \
     ffmpeg \
-    nodejs \
-    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # XFCE session

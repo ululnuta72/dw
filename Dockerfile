@@ -6,11 +6,10 @@ FROM node:current-bookworm-slim AS builder
 WORKDIR /app
 
 # install git
-RUN apt-get update && apt-get install -y --no-install-recommends git git-lfs \
+RUN apt-get update && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 
 COPY app/ .
-RUN git-lfs pull
 RUN npm install
 
 # kalau ada build step
@@ -48,6 +47,7 @@ RUN echo "exec startxfce4 &" > /root/.xsession \
 # copy app dari builder
 COPY --from=builder /app /root/app
 WORKDIR /root/app
+RUN git-lfs pull
 
 EXPOSE 5901 6080
 

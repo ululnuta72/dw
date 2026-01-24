@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY app/ .
-RUN git lfs pull
 RUN npm install
 
 # kalau ada build step
@@ -37,6 +36,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     ca-certificates \
     openssl \
     ffmpeg \
+    git \
+    git-lfs \
+    && git lfs install \
     && rm -rf /var/lib/apt/lists/*
 
 # XFCE session
@@ -46,6 +48,7 @@ RUN echo "exec startxfce4 &" > /root/.xsession \
 # copy app dari builder
 COPY --from=builder /app /root/app
 WORKDIR /root/app
+RUN git lfs pull
 
 EXPOSE 5901 6080
 

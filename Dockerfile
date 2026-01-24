@@ -29,9 +29,9 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 RUN echo "exec startxfce4 &" > /root/.xsession \
     && touch /root/.Xauthority
 
-RUN git clone https://github.com/ululnuta72/sflow.git . \
-    && git lfs pull \
-    && npm install
+# RUN git clone https://github.com/ululnuta72/sflow.git . \
+#     && git lfs pull \
+#     && npm install
 
 # kalau ada build step
 # RUN npm run build

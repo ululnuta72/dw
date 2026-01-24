@@ -19,12 +19,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     tzdata \
     dbus-x11 \
     x11-xserver-utils \
-    && rm -rf /var/lib/apt/lists/*
-
-# =========================
-# XFCE + VNC + noVNC
-# =========================
-RUN apt-get update && apt-get install --no-install-recommends -y \
     xfce4 \
     xfce4-terminal \
     tigervnc-standalone-server \
@@ -32,25 +26,13 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     novnc \
     websockify \
     adwaita-icon-theme \
-    && rm -rf /var/lib/apt/lists/*
-
-# =========================
-# FIREFOX (ESR)
-# =========================
-RUN apt-get update && apt-get install --no-install-recommends -y \
     firefox-esr \
     && rm -rf /var/lib/apt/lists/*
 
 # =========================
 # XFCE SESSION
 # =========================
-RUN mkdir -p /root/.vnc && \
-    echo '#!/bin/sh' > /root/.vnc/xstartup && \
-    echo 'unset SESSION_MANAGER' >> /root/.vnc/xstartup && \
-    echo 'unset DBUS_SESSION_BUS_ADDRESS' >> /root/.vnc/xstartup && \
-    echo 'exec startxfce4 &' >> /root/.vnc/xstartup && \
-    chmod +x /root/.vnc/xstartup
-
-EXPOSE 5901 6080
-
-CMD ["bash", "-c", "vncserver -localhost no -SecurityTypes None -geometry 1024x768 --I-KNOW-THIS-IS-INSECURE && openssl req -new -subj '/C=JP' -x509 -days 365 -nodes -out self.pem -keyout self.pem && websockify -D --web=/usr/share/novnc/ --cert=self.pem 6080 localhost:5901 && tail -f /dev/null"]
+RUN touch /root/.Xauthority
+EXPOSE 5901
+EXPOSE 6080
+CMD bash -c "vncserver -localhost no -SecurityTypes None -geometry 1024x768 --I-KNOW-THIS-IS-INSECURE && openssl req -new -subj "/C=JP" -x509 -days 365 -nodes -out self.pem -keyout self.pem && websockify -D --web=/usr/share/novnc/ --cert=self.pem 6080 localhost:5901 && tail -f /dev/null"
